@@ -1,18 +1,31 @@
 -   [basic commands](#basic-commands)
 -   [CRUD operations](#crud-operations)
+-   [projections](#projections)
 
 # basic commands
 
-### show all databases
+**show all databases**
 
 ```
 show dbs
 ```
 
-### switch to specific database
+**switch to specific database**
 
 ```
 use [name]
+```
+
+**drop database**
+
+```
+db.dropDatabase()
+```
+
+**drop collection**
+
+```
+db.myCollection.drop()
 ```
 
 This command can be used even if database with the given name doesn't exists yet (it will be created, once we start entering data to it).
@@ -101,10 +114,48 @@ If we are sure that we need all the documents at once, we can invoke _cursor_'s 
 db.products.find().toArray();
 ```
 
-Of course, we can do more than just filter based on equality of some key/value pairs. We can, for example, want to find all the products with price greater than 100. To achieve that, we need to use another special mongodb operator **\$gt** (which stands for _greater than_).
+Considering the filter, we can do more than just filter based on equality of some key/value pairs. We can, for example, want to find all the products with price greater than 100. To achieve that, we need to use another special mongodb operator **\$gt** (which stands for _greater than_).
 
 ```javascript
 db.products.find({ price: { $gt: 100 } });
 ```
 
 There are also other comparison operators that we can use. For example, **\$eq** matches values that are equal to a specified value and **\$lte** matches values that are less than or equal to a specified value.
+
+# projections
+
+If we need to fetch documents but only need some of their properties, it might make sense to fetch only the data that we actually need, omitting the rest.
+
+Let's assume that we have documents with this structure.
+
+```javascript
+{
+    name: 'Jim',
+    email: 'test@test.com',
+    password: '1902jd210jd291m120d',
+    cart: {
+        items: ['product_id1', 'product_id2', 'product_id3']
+    }
+}
+```
+
+For a certain type of tasks, we might be only need user's email. What we can do is to fetch such documents and then transform them on our backend.
+
+The better approach though is to tell mongodb that we are interested only in _name_ and let the mongodb to perform this transformation, or more precisely, to create a projection which will then be sent to our backend. Not only can mongodb perform such operation more efficiently, but we are also sending possibly much less data through the network.
+
+To tell mongodb to return such projection, we need to specify the second argument for the **find** method, which is an object where we specify names of the properties with values 0 or 1. 0 means that the property should not be included in the projection (1 - include). If we pass this second argument, then values for all the properties are set to 0 by default, except for _\_id_ which is set to 1. Therefore, if we pass in empty object, then the we will receive projection that will contain only ids of the documents.
+
+```javascript
+db.users.find({}, { name: 1 });
+```
+
+# Data Types
+
+-   _text_ - simple strings
+-   _boolean_ - true / false
+-   _numbers_ - int32 | int64 | decimal numbers
+-   _ObjectId_ - unique values used for ids
+-   _ISODate_ - date format
+-   _timestamp_ - date that is guaranteed to be unique
+-   _embedded documents_
+-   _arrays_

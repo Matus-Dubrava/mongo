@@ -1,0 +1,35 @@
+[
+    {
+        "firstName": "John",
+        "lastName": "Doe",
+        "age": 42,
+        "history": [
+            {
+                "disease": "cold",
+                "treatment": 1
+            }
+        ]
+    },
+    {
+        "firstName": "Sue",
+        "lastName": "Jones",
+        "age": 35,
+        "history": [
+            {
+                "disease": "cold",
+                "treatment": 1
+            }
+        ]
+    },
+    {
+        "firstName": "Mat",
+        "lastName": "Donovan",
+        "age": 50,
+        "history": [
+            {
+                "disease": "headache",
+                "treatment": 2
+            }
+        ]
+    }
+]
