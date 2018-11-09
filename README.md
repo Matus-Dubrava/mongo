@@ -86,6 +86,21 @@ Find returns all the documents that match the specified filter which is the firs
 db.products.find({ price: 149.99 });
 ```
 
+Important thing to note here is that it doesn't really return documents, but instead it returns object that is called _cursor_ on which we can invoke additonal methods.
+This is simply because our collections may contain large amount of data that we may not need to fetch all at once.
+
+To use this cursor to iterate through the whole collection, one document at a time, and possibly do something with each individual document, we can invoke **forEach** method on the cursor and pass a callback function to it.
+
+```javascript
+db.products.find().forEach(product => printjson(product));
+```
+
+If we are sure that we need all the documents at once, we can invoke _cursor_'s **toArray** method which returns an array filled with all the documents.
+
+```javascript
+db.products.find().toArray();
+```
+
 Of course, we can do more than just filter based on equality of some key/value pairs. We can, for example, want to find all the products with price greater than 100. To achieve that, we need to use another special mongodb operator **\$gt** (which stands for _greater than_).
 
 ```javascript
