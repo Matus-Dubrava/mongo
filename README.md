@@ -124,7 +124,7 @@ There are also other comparison operators that we can use. For example, **\$eq**
 
 # projections
 
-If we need to fetch documents but only need some of their properties, it might make sense to fetch only the data that we actually need, omitting the rest.
+If we need to fetch documents but only need some of their fields, it might make sense to fetch only the data that we actually need, omitting the rest.
 
 Let's assume that we have documents with this structure.
 
@@ -139,11 +139,11 @@ Let's assume that we have documents with this structure.
 }
 ```
 
-For a certain type of tasks, we might be only need user's email. What we can do is to fetch such documents and then transform them on our backend.
+For a certain type of tasks, we might only need user's email. What we can do is to fetch such documents and then transform them on our backend.
 
 The better approach though is to tell mongodb that we are interested only in _name_ and let the mongodb to perform this transformation, or more precisely, to create a projection which will then be sent to our backend. Not only can mongodb perform such operation more efficiently, but we are also sending possibly much less data through the network.
 
-To tell mongodb to return such projection, we need to specify the second argument for the **find** method, which is an object where we specify names of the properties with values 0 or 1. 0 means that the property should not be included in the projection (1 - include). If we pass this second argument, then values for all the properties are set to 0 by default, except for _\_id_ which is set to 1. Therefore, if we pass in empty object, then the we will receive projection that will contain only ids of the documents.
+To tell mongodb to return such projection, we need to specify the second argument for the **find** method, which is an object where we specify fields with values 0 or 1. 0 means that the field should not be included in the projection (1 for include). If we pass this second argument, then values for all the properties are set to 0 by default, except for _\_id_ which is set to 1. Therefore, if we pass in empty object, then we will receive projection that will contain only ids of documents.
 
 ```javascript
 db.users.find({}, { name: 1 });
