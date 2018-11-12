@@ -4,6 +4,7 @@
         -   [insertOne](#insertone)
         -   [insertMany](#insertmany)
         -   [ordered inserts](#ordered-inserts)
+        -   [write concern](#write-concern)
     -   [Read](#read)
     -   [Update](#update)
     -   [Delete](#delete)
@@ -109,6 +110,20 @@ If, however, we want to continue inserting documents even if one, or more of the
 ```javascript
 db.insertMany([...], { ordered: false });
 ```
+
+### write concern
+
+When we execute insert operation on mongodb, the data is not immediatelly saved to file system, instead it is just stored inside of memory where the object to be then saved is created and we get a response with the according objectId of that newly created object.
+
+This, obviously, can fail if the memory in which the object is stored is wiped before it is saved to file system.
+
+If we want to be sure that we get response about successful insert operation only once the data has actually been stored in a reliable way, we can create so called **journal** file that will store the operations that need to be performed. In such case, even if memory fails, the operation will still be performed once a server is rebooted, because we have logged information about the insert operation.
+
+```javascript
+db.products.insertOne({ name: 'PC' }, { writeConcern: { j: true } });
+```
+
+In the above command, `j` stands for journal.
 
 ## Read
 
