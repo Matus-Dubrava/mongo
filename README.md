@@ -8,9 +8,10 @@
         -   [write concern](#write-concern)
         -   [importing data](#importing-data)
     -   [Read](#read)
+        -   [find](#find)
+        -   [quering nested documents](#quering-nested-documents)
     -   [Update](#update)
     -   [Delete](#delete)
--   [CRUD operations](#crud-operations)
 -   [projections](#projections)
 
 # basic commands
@@ -150,30 +151,6 @@ mongoimport my-data.json -d databaseName -c collectionName --jsonArray --drop
 -   find(filter, options)
 -   findOne(filter, options)
 
-## Update
-
--   updateOne(filter, data, options)
--   updateMany(filter, data, options)
--   replaceOne(filter, data, options)
-
-## Delete
-
--   deleteOne(filter, options)
--   deleteMany(filter, options)
-
-### updateOne
-
-In case of update one, first thing we need to pass to this method is a filter, that is, a document to filter the data against.
-
-If we want to update just some of the properties of the document, not the whole document, then we need to use **\$set**, which is a special mongodb operator. This operator is then followed by a subdocument (key/value pairs) that we want to update on the matched document.
-
-```javascript
-db.products.updateOne(
-    { name: "Watches"},
-    { $set: { price: 149.99, madeIn: "China" } } }
-)
-```
-
 ### find
 
 Find returns all the documents that match the specified filter which is the first argument passed in to the find method.
@@ -204,6 +181,45 @@ db.products.find({ price: { $gt: 100 } });
 ```
 
 There are also other comparison operators that we can use. For example, **\$eq** matches values that are equal to a specified value and **\$lte** matches values that are less than or equal to a specified value.
+
+### quering nested documents
+
+In case we want to query nested documents, we need to specify the whole path to the field.
+
+```javascript
+{
+    name: "watches",
+    rating: {
+        average: 9.3
+    }
+}
+
+db.products.find("rating.average": { $gt: 8 });
+```
+
+## Update
+
+-   updateOne(filter, data, options)
+-   updateMany(filter, data, options)
+-   replaceOne(filter, data, options)
+
+## Delete
+
+-   deleteOne(filter, options)
+-   deleteMany(filter, options)
+
+### updateOne
+
+In case of update one, first thing we need to pass to this method is a filter, that is, a document to filter the data against.
+
+If we want to update just some of the properties of the document, not the whole document, then we need to use **\$set**, which is a special mongodb operator. This operator is then followed by a subdocument (key/value pairs) that we want to update on the matched document.
+
+```javascript
+db.products.updateOne(
+    { name: "Watches"},
+    { $set: { price: 149.99, madeIn: "China" } } }
+)
+```
 
 # projections
 
