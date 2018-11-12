@@ -1,6 +1,7 @@
 -   [basic commands](#basic-commands)
 -   [CRUD operations](#crud-operations)
 -   [projections](#projections)
+-   [Shell utilities](#shell-utilities)
 
 # basic commands
 
@@ -29,6 +30,34 @@ db.myCollection.drop()
 ```
 
 This command can be used even if database with the given name doesn't exists yet (it will be created, once we start entering data to it).
+
+# Shell utilities
+
+-   start mongo server
+
+```
+sudo mongod
+```
+
+-   set a different db path (default is `/data/db`)
+
+```
+sudo mongod --dbpath path-to-db/db
+```
+
+-   set custom log path, unlike in the previous command, where we pointed the path to somo folder, here we need to provide a path to a specific file
+
+```
+sudo mongod --logpath path-to-logs/logs/log.log
+```
+
+-   shutdown the server
+
+run `mongo` command
+
+then switch to _admin_ database `use admin`
+
+then run `db.shutdownServer()`
 
 # CRUD operations
 
