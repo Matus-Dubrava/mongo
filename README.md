@@ -5,6 +5,7 @@
         -   [insertMany](#insertmany)
         -   [ordered inserts](#ordered-inserts)
         -   [write concern](#write-concern)
+        -   [importing data](#importing-data)
     -   [Read](#read)
     -   [Update](#update)
     -   [Delete](#delete)
