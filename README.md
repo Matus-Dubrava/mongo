@@ -1,5 +1,6 @@
 -   [basic commands](#basic-commands)
 -   [Shell utilities](#shell-utilities)
+-   [CRUD operations](#crud-operations)
     -   [Create](#create)
         -   [insertOne](#insertone)
         -   [insertMany](#insertmany)
