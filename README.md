@@ -125,6 +125,24 @@ db.products.insertOne({ name: 'PC' }, { writeConcern: { j: true } });
 
 In the above command, `j` stands for journal.
 
+### importing data
+
+If we need to import json data into our database, we can use this command (outside of mongo shell).
+
+```javascript
+mongoimport my-data.json -d databaseName -c collectionName --jsonArray --drop
+```
+
+`my-data.json` is the file that we want to import (if we are running this command inside of the folder where this file sits, otherwise we need to provide full path to the file)
+
+`-d databaseName` is the name of the database that should be used for this data (doesn't need to exists)
+
+`-c collectionName` same as above, but with respect to collection
+
+`--jsonArray` should be specified if the data that we are importing is an array instead of single object.
+
+`--drop` should be specified to drop the specified database if it exists and create a new one with that name (otherwise the data will be appended to the already existing data)
+
 ## Read
 
 -   find(filter, options)
