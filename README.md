@@ -1,7 +1,14 @@
 -   [basic commands](#basic-commands)
+-   [Shell utilities](#shell-utilities)
+    -   [Create](#create)
+        -   [insertOne][#insertone]
+        -   [insertMany][#insertmany]
+        -   [ordered inserts][#ordered-inserts]
+    -   [Read](#read)
+    -   [Update](#update)
+    -   [Delete](#delete)
 -   [CRUD operations](#crud-operations)
 -   [projections](#projections)
--   [Shell utilities](#shell-utilities)
 
 # basic commands
 
@@ -66,31 +73,17 @@ then run `db.shutdownServer()`
 -   insertOne(data, options)
 -   insertMany(data, options)
 
-## Read
-
--   find(filter, options)
--   findOne(filter, options)
-
-## Update
-
--   updateOne(filter, data, options)
--   updateMany(filter, data, options)
--   replaceOne(filter, data, options)
-
-## Delete
-
--   deleteOne(filter, options)
--   deleteMany(filter, options)
-
 ### insertOne
 
-```
-db.[name-of-document].insertOne([json data])
+```javascript
+db.collectionName.insertOne(data);
 ```
 
 ```javascript
 db.products.insertOne({ name: 'watches', price: '198.99' });
 ```
+
+### insertMany
 
 **insertMany** is the same as **insertOne** method, but instead of passing in just one object (JSON), we are passing multiple such objects in one array
 
@@ -106,6 +99,32 @@ db.products.insertMany([
     }
 ]);
 ```
+
+### ordered inserts
+
+By default, each document in an array that is passed in to **insertMany** method is inserted separatelly, meaning that a separate insert operation is run for each of these document. If any of these operations fails, then all the process is stopped (without performing rollback).
+
+If, however, we want to continue inserting documents even if one, or more of them can't be inserted, we can pass in a second argument to the **insertMany** method, where we need to specify **ordered** property and set it to _false_ (it is set to _true_ by default).
+
+```javascript
+db.insertMany([...], { ordered: false });
+```
+
+## Read
+
+-   find(filter, options)
+-   findOne(filter, options)
+
+## Update
+
+-   updateOne(filter, data, options)
+-   updateMany(filter, data, options)
+-   replaceOne(filter, data, options)
+
+## Delete
+
+-   deleteOne(filter, options)
+-   deleteMany(filter, options)
 
 ### updateOne
 
