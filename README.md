@@ -1,9 +1,9 @@
 -   [basic commands](#basic-commands)
 -   [Shell utilities](#shell-utilities)
     -   [Create](#create)
-    -   [insertOne][#insertone]
-    -   [insertMany][#insertmany]
-    -   [ordered inserts][#ordered-inserts]
+        -   [insertOne](#insertone)
+        -   [insertMany](#insertmany)
+        -   [ordered inserts](#ordered-inserts)
     -   [Read](#read)
     -   [Update](#update)
     -   [Delete](#delete)
