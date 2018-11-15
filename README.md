@@ -13,6 +13,7 @@
     -   [Update](#update)
     -   [Delete](#delete)
 -   [projections](#projections)
+-   [indexes](#indexes)
 
 # basic commands
 
@@ -28,6 +29,8 @@ show dbs
 use [name]
 ```
 
+This command can be used even if database with the given name doesn't exists yet (it will be created, once we start entering data to it).
+
 **drop database**
 
 ```
@@ -39,8 +42,6 @@ db.dropDatabase()
 ```
 db.myCollection.drop()
 ```
-
-This command can be used even if database with the given name doesn't exists yet (it will be created, once we start entering data to it).
 
 # Shell utilities
 
@@ -203,6 +204,8 @@ db.products.find("rating.average": { $gt: 8 });
 -   updateMany(filter, data, options)
 -   replaceOne(filter, data, options)
 
+### updating matched array element
+
 ## Delete
 
 -   deleteOne(filter, options)
@@ -258,3 +261,74 @@ db.users.find({}, { name: 1 });
 -   _timestamp_ - date that is guaranteed to be unique
 -   _embedded documents_
 -   _arrays_
+
+# indexes
+
+To see all indexes that have been created for a collection, we can issue this command.
+
+```javascript
+db.mycollection.getIndexes();
+```
+
+If we want to create a new, simple (single-field) index
+
+```javascript
+db.mycollection.createIndex({ name: 1 });
+```
+
+where `name` is name of the field that we want to create index on and `1` simply means that the index should be sortend in ascending order (`-1` for descending order).
+
+Deletion of index can be done by
+
+```javascript
+db.mycollection.dropIndex({ name: 1 });
+```
+
+## compound indexes
+
+We can use more than just one field when we are building an index.
+
+```javascript
+db.mycollection.createIndex({ name: 1, age: 1 });
+```
+
+In this case, both name and age will be part of the index and we can use either `name` or `name and age` fileds for efficient queries. Note that the order here matters. We can't use only `age` in such case because those fields are ordered from left to right. Meaning that mongodb firsts sorts based on `name` and then performs nested sorting based on `age` field.
+
+These queries will use the above created index.
+
+```javascript
+db.mycollection.find({ name: 'some name' });
+
+db.mycollection.find({ name: 'some name', age: { $gt: 30 } });
+```
+
+But this query will not. Mongodb in this case will use collection scan, which means that it will scan through the whole collection to find the requested documents.
+
+```javascript
+db.mycollection.find({ age: { $gt: 30 } });
+```
+
+## query plan
+
+To see how exacly mongodb handles given query (type of used scan and some other statistics), we can use `explain` method.
+
+```javascript
+db.mycollection.explain().find({ name: 'Matus' });
+```
+
+We can also pass a string argument to `explain` to specify how much data we want the mongodb to show us, e.g `executionStats` to see more detailed statistics.
+
+There, in the output of the `explain` method, we can find property with name `winningPlan` which represents the plan that mongodb is going with for the given query.
+
+`winningPlan` has property with name `stage`. If we execute those two commands from the previous section where we are expecting mongodb to use index scan, then we can observe this by looking at the value of `stage` property which should, and indeed is `IXSCAN`. In case of the third command for which mongodb has to go through the whole collection, `stage` has value `COLLSCAN`.
+
+Another interesting field is `rejectedPlans` where we can see some other plans that mongodb considered but rejected them because it deemed them to be slower than the winning one, which should be the fastest out of every competing plan.
+
+If we are searching for a field (or at least part of our query contains the field) that is included in multiple indexes (we can have several compound indexes where each of them includes the same field), then mongodb needs to choose which index to use for a given query, rejecting the others. To achieve this, mongodb firsts runs a test query on a small subset of the collection and picks the fastest one. Not only it chooses the best index to use, but it also caches the result which it will reuse in future if it encounters the same exact query (note that this case is not stored forewer, it will get erased it the mongodb server restarts for example, but also after certain amount of insert operations etc.).
+
+## text indexes
+
+To create text index for a field, we can use the following syntax.
+
+```javascript
+```
