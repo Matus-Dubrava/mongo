@@ -14,6 +14,10 @@
     -   [Delete](#delete)
 -   [projections](#projections)
 -   [indexes](#indexes)
+    -   [compound indexes](#compound-indexes)
+    -   [query plan](#query-plan)
+    -   [covered queries](#covered-queries)
+    -   [text indexes](#text-indexes)
 
 # basic commands
 
@@ -324,11 +328,62 @@ There, in the output of the `explain` method, we can find property with name `wi
 
 Another interesting field is `rejectedPlans` where we can see some other plans that mongodb considered but rejected them because it deemed them to be slower than the winning one, which should be the fastest out of every competing plan.
 
-If we are searching for a field (or at least part of our query contains the field) that is included in multiple indexes (we can have several compound indexes where each of them includes the same field), then mongodb needs to choose which index to use for a given query, rejecting the others. To achieve this, mongodb firsts runs a test query on a small subset of the collection and picks the fastest one. Not only it chooses the best index to use, but it also caches the result which it will reuse in future if it encounters the same exact query (note that this case is not stored forewer, it will get erased it the mongodb server restarts for example, but also after certain amount of insert operations etc.).
+If we are searching for a field (or at least part of our query contains the field) that is included in multiple indexes (we can have several compound indexes where each of them includes the same field), then mongodb needs to choose which index to use for a given query, rejecting the others. To achieve this, mongodb first runs a test query on a small subset of the collection and picks the fastest one. Not only it chooses the best index to use, but it also caches the result which it will reuse in future if it encounters the same exact query (note that this cache is not stored forever, it will get erased it the mongodb server restarts for example, but also after certain amount of insert operations etc.).
+
+## covered queries
+
+Covered queries are queries that are completely covered by the index itself. It means that mongodb doesn't have to go looking for the requested data to the collection on which we are performing the query.
+
+Usually, when we issue a query for which mongodb can leverage some index, then it will use index scan, finding the fields with requested parital data in the index where there are pointer stored for for each index entry pointing to the actual document in collection.
+
+Once the index scan has been completed, then the seach continues by going into the collection and mapping the rest of the data on index entries that has been included in the result.
+
+If, however, the index contains all the requested data, then mongodb doesn't have to perform this mapping but instead it can return the requested documents right after scanning through index. This may lead to more performant queries.
+
+Let's assume that we have a collection of persons, where each document has two fiels, name and age. There is index associated with this collection that was created using the following command.
+
+```javascript
+db.users.createIndex({ name: 1 });
+```
+
+If we now execute query such as
+
+```javascript
+db.users.find({ name: 'some name' });
+```
+
+Then we can observe that mongodb used index scan, using the above index (again, we can look for `IXSCAN` vs `COLLSCAN`). If we have passed `executionStats` to `example` method, then we can also see properties `totalKeysExamined` and `totalDocsExamined` where the former one tells us how many index entries mongodb had to examine to process the query and the later one then holds the number of actual documents that were examined.
+
+Assuming that `names` are unique in our database and there is a document with the `some name` value, then we should observe that both of the above mentioned properties have a value of `1`.
+
+Let's change the above `find` query a little and use projection.
+
+```javascript
+db.users.find({ name: 'some name' }, { _id: 0, name: 1 });
+```
+
+If we execute the above query, then `totalKeysExamined` stays unchanged, but `totalDocsExamined` is `0`. This means that `users` collection has not been used at all and all data has been retured obtained directly from index.
+
+## multi-key indexes
+
+Multi-key indexes refer to indexes placed on array fields. If we user array field to create an index, mongodb pulls all the elements of the array and places the, directly to the index so that we can efficiently perform search queries based on array elements.
+
+There are two limitations associated with using multi-key indexes. The first one is that only elements that are simple values (not nested documents) can be pulled out. The second is that we can't combine multiple array fields in a single index (the reason is that mongodb would have to do cartesian multiplication on such fields which could lead to indexes of enormous sizes, even compared to the original collection and such indexes would be mostly useless) but we can still combine array field with non-array fields in a single index.
 
 ## text indexes
 
-To create text index for a field, we can use the following syntax.
+Text indexes are used to perform text queries much more efficiently (we can always use `regex` to search for a text patterns but such queries are usually slow). In case of text index, mongodb pulls all the words (except `a`, `is`, `the` etc. in case we are using engilsh language, which can be changed) from a specified field to the index.
+
+To create text index on a field, we can use the following syntax.
 
 ```javascript
+db.mycollection.createIndex({ description: 'text' });
+```
+
+Note that we can't have multiple text indexes specified for a single collection
+
+To perform a text search
+
+```javascript
+db.mycollection.createIndex({ $text: { $search: 'some text' } });
 ```
